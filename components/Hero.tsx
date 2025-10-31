@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const Hero: React.FC = () => {
@@ -17,7 +16,7 @@ const Hero: React.FC = () => {
           From One Coop to a Community: Turning backyards into a source of dignity, income, and food security.
         </p>
         <a
-          href="#about"
+          href="#network-info"
           className="bg-brand-yellow text-brand-dark font-bold py-3 px-8 rounded-lg text-lg hover:bg-yellow-500 transition-all duration-300 shadow-xl transform hover:scale-105"
         >
           Discover Our Mission

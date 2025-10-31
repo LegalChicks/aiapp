@@ -3,6 +3,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import NetworkInfoSection from './components/NetworkInfoSection';
 import ModelSection from './components/ModelSection';
+import TrainingModulesSection from './components/TrainingModulesSection';
 import AiHelperSection from './components/AiHelperSection';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
@@ -11,6 +12,7 @@ import AiChatbot from './components/AiChatbot';
 import Dashboard from './components/Dashboard';
 import { User, logout } from './services/authService';
 import Notification from './components/Notification';
+import AdminDashboard from './components/Admin/AdminDashboard';
 
 const App: React.FC = () => {
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
@@ -24,7 +26,7 @@ const App: React.FC = () => {
     setCurrentUser(user);
     closeLoginModal();
     // Trigger a notification on successful login
-    setNotification(`Welcome back, ${user.name}! Check out the latest announcements.`);
+    setNotification(`Welcome back, ${user.name}!`);
   };
 
   const handleLogout = () => {
@@ -37,6 +39,7 @@ const App: React.FC = () => {
   };
 
   const isLoggedIn = !!currentUser;
+  const isAdmin = currentUser?.role === 'admin';
 
   return (
     <div className="bg-brand-light text-brand-dark font-sans">
@@ -47,15 +50,21 @@ const App: React.FC = () => {
         isLoggedIn={isLoggedIn}
         onLoginClick={openLoginModal} 
         onLogout={handleLogout}
+        currentUser={currentUser}
       />
       <main>
         {isLoggedIn && currentUser ? (
-          <Dashboard user={currentUser} onUserUpdate={handleUserUpdate} />
+          isAdmin ? (
+            <AdminDashboard adminUser={currentUser} />
+          ) : (
+            <Dashboard user={currentUser} onUserUpdate={handleUserUpdate} />
+          )
         ) : (
           <>
             <Hero />
-            <NetworkInfoSection />
+            <NetworkInfoSection isLoggedIn={isLoggedIn} onLoginClick={openLoginModal} />
             <ModelSection />
+            <TrainingModulesSection isLoggedIn={isLoggedIn} onLoginClick={openLoginModal} />
             <AiHelperSection />
             <ContactSection />
           </>

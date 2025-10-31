@@ -3,18 +3,21 @@ export interface User {
   username: string;
   name: string;
   cluster: string;
+  role: 'member' | 'admin';
   contactMethod?: string;
 }
 
 // In a real application, this data would come from a secure backend.
 const mockUsers: User[] = [
-  { id: 1, username: 'member1', name: 'Juan dela Cruz', cluster: 'Tuguegarao City', contactMethod: 'Email: juan@example.com' },
-  { id: 2, username: 'member2', name: 'Maria Santos', cluster: 'Solana', contactMethod: 'Phone: 0917-123-4567' },
+  { id: 1, username: 'member1', name: 'Juan dela Cruz', cluster: 'Tuguegarao City', role: 'member', contactMethod: 'Email: juan@example.com' },
+  { id: 2, username: 'member2', name: 'Maria Santos', cluster: 'Solana', role: 'member', contactMethod: 'Phone: 0917-123-4567' },
+  { id: 3, username: 'admin', name: 'Froilan Lingan', cluster: 'HQ', role: 'admin' },
 ];
 
 const mockPasswords: { [key: string]: string } = {
   member1: 'password123',
   member2: 'password456',
+  admin: 'adminpass',
 };
 
 /**
@@ -58,6 +61,19 @@ export const updateUserProfile = (userId: number, contactMethod: string): Promis
       }
     }, 300); // Simulate network delay
   });
+};
+
+/**
+ * Simulates fetching all users for an admin panel.
+ * @returns A Promise that resolves with an array of all users.
+ */
+export const getAllUsers = (): Promise<User[]> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            // Return all users except the admin itself for management purposes
+            resolve(mockUsers.filter(u => u.role !== 'admin'));
+        }, 400); // Simulate network delay
+    });
 };
 
 

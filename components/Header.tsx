@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Logo from './Logo';
+import { User } from '../services/authService';
 
 interface HeaderProps {
   isLoggedIn: boolean;
   onLoginClick: () => void;
   onLogout: () => void;
+  currentUser: User | null;
 }
 
-const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLoginClick, onLogout }) => {
+const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLoginClick, onLogout, currentUser }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeLink, setActiveLink] = useState('#home');
 
@@ -15,6 +17,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLoginClick, onLogout }) =
     { name: 'Home', href: '#home' },
     { name: 'Our Network', href: '#network-info' },
     { name: 'Our Model', href: '#model' },
+    { name: 'Training', href: '#training-modules' },
     { name: 'AI Assistant', href: '#ai-assistant' },
     { name: 'Contact', href: '#contact' },
   ];
@@ -26,21 +29,32 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLoginClick, onLogout }) =
     { name: 'Supplies', href: '#supplies' },
     { name: 'Announcements', href: '#announcements' },
   ];
+
+  const adminLinks = [
+    { name: 'Admin Panel', href: '#admin-dashboard' },
+    { name: 'Members', href: '#user-management' },
+    { name: 'Content', href: '#content-management' },
+    { name: 'Analytics', href: '#network-analytics' },
+  ];
   
-  const navLinks = isLoggedIn ? memberLinks : publicLinks;
+  const getNavLinks = () => {
+    if (!isLoggedIn) return publicLinks;
+    if (currentUser?.role === 'admin') return adminLinks;
+    return memberLinks;
+  }
+  
+  const navLinks = getNavLinks();
   
   const handleScroll = () => {
-    let currentSection = navLinks[0].href;
-    for (let i = navLinks.length - 1; i >= 0; i--) {
-      const link = navLinks[i];
-      const sectionId = link.href.substring(1);
-      const section = document.getElementById(sectionId) as HTMLElement;
-      if (section && window.scrollY >= section.offsetTop - 150) {
-        currentSection = link.href;
-        break;
-      }
+    let currentSectionId = '';
+    const sections = navLinks.map(link => document.getElementById(link.href.substring(1)));
+
+    for (const section of sections) {
+        if (section && window.scrollY >= section.offsetTop - 150) {
+            currentSectionId = `#${section.id}`;
+        }
     }
-    setActiveLink(currentSection);
+    setActiveLink(currentSectionId || navLinks[0]?.href);
   };
 
 
@@ -49,10 +63,16 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLoginClick, onLogout }) =
     handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoggedIn, navLinks]);
+  }, [isLoggedIn, currentUser]);
+
+  const getDefaultSectionId = () => {
+    if (!isLoggedIn) return 'home';
+    if (currentUser?.role === 'admin') return 'admin-dashboard';
+    return 'dashboard';
+  }
 
   return (
-    <header id={isLoggedIn ? 'dashboard' : 'home'} className="bg-brand-light/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+    <header id={getDefaultSectionId()} className="bg-brand-light/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-6 py-3 flex justify-between items-center">
         <Logo />
         <div className="hidden md:flex items-center space-x-6">

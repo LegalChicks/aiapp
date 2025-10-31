@@ -38,7 +38,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess
           </svg>
         </button>
         <h2 className="text-2xl font-bold text-brand-dark mb-2 text-center">Member Login</h2>
-        <p className="text-center text-sm text-gray-500 mb-4">Demo: try `member1` / `password123`</p>
+        <p className="text-center text-sm text-gray-500 mb-4">Demo: `member1`/`password123` or `admin`/`adminpass`</p>
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

@@ -2,10 +2,17 @@ import React, { useState } from 'react';
 
 type Tab = 'mission' | 'services' | 'stories';
 
+interface NetworkInfoProps {
+    isLoggedIn: boolean;
+    onLoginClick: () => void;
+}
+
 const MissionIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" /></svg>;
 const ServicesIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>;
 const StoriesIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>;
-const CheckIcon = () => <svg className="w-6 h-6 text-brand-green mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>;
+const CheckIcon = () => <svg className="w-6 h-6 text-brand-green mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"></path></svg>;
+const LockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400 mb-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>;
+
 
 const testimonials = [
     {
@@ -35,7 +42,7 @@ const TabButton: React.FC<{ active: boolean; onClick: () => void; children: Reac
     </button>
 );
 
-const NetworkInfoSection: React.FC = () => {
+const NetworkInfoSection: React.FC<NetworkInfoProps> = ({ isLoggedIn, onLoginClick }) => {
     const [activeTab, setActiveTab] = useState<Tab>('mission');
 
     return (
@@ -86,22 +93,53 @@ const NetworkInfoSection: React.FC = () => {
                              </div>
                         )}
                         {activeTab === 'stories' && (
-                            <div className="animate-fade-in">
-                                <h3 className="text-2xl font-semibold text-brand-brown mb-6">Real Stories from Our Members</h3>
-                                <div className="space-y-6">
-                                    {testimonials.map((testimonial, index) => (
-                                        <div key={index} className="bg-brand-light p-6 rounded-lg border-l-4 border-brand-yellow">
-                                            <p className="text-gray-800 italic">"{testimonial.quote}"</p>
-                                            <div className="flex items-center mt-4">
-                                                <img src={testimonial.avatar} alt={testimonial.name} className="w-12 h-12 rounded-full mr-4" />
-                                                <div>
-                                                    <p className="font-bold text-brand-dark">{testimonial.name}</p>
-                                                    <p className="text-sm text-gray-600">{testimonial.cluster}</p>
+                            <div className="animate-fade-in relative">
+                                {isLoggedIn ? (
+                                    <>
+                                        <h3 className="text-2xl font-semibold text-brand-brown mb-6">Real Stories from Our Members</h3>
+                                        <div className="space-y-6">
+                                            {testimonials.map((testimonial, index) => (
+                                                <div key={index} className="bg-brand-light p-6 rounded-lg border-l-4 border-brand-yellow">
+                                                    <p className="text-gray-800 italic">"{testimonial.quote}"</p>
+                                                    <div className="flex items-center mt-4">
+                                                        <img src={testimonial.avatar} alt={testimonial.name} className="w-12 h-12 rounded-full mr-4" />
+                                                        <div>
+                                                            <p className="font-bold text-brand-dark">{testimonial.name}</p>
+                                                            <p className="text-sm text-gray-600">{testimonial.cluster}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="relative">
+                                        <div className="blur-sm">
+                                            <h3 className="text-2xl font-semibold text-brand-brown mb-6">Real Stories from Our Members</h3>
+                                            <div className="bg-brand-light p-6 rounded-lg border-l-4 border-brand-yellow">
+                                                <p className="text-gray-800 italic">"Joining LCEN was the best decision for my family. The training was practical, and the community support is incredible..."</p>
+                                                <div className="flex items-center mt-4">
+                                                    <div className="w-12 h-12 rounded-full mr-4 bg-gray-300"></div>
+                                                    <div>
+                                                        <p className="font-bold text-brand-dark">Elena R.</p>
+                                                        <p className="text-sm text-gray-600">Solana Cluster</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 rounded-lg">
+                                            <LockIcon />
+                                            <h4 className="text-xl font-bold text-brand-dark mb-2">Members Only Content</h4>
+                                            <p className="text-gray-600 mb-4 text-center">Log in or register to read inspiring success stories from our community.</p>
+                                            <button
+                                                onClick={onLoginClick}
+                                                className="bg-brand-yellow text-brand-dark font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition-all duration-300 shadow"
+                                            >
+                                                Log In to View
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
