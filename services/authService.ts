@@ -1,116 +1,86 @@
-// services/authService.ts
-import { supabase } from './supabaseClient';
-
-// This is the shape of your 'profiles' table, not the auth.users
-export interface UserProfile {
-  id: string; // This is the UUID from auth.users
+export interface User {
+  id: number;
+  username: string;
   name: string;
   cluster: string;
   role: 'member' | 'admin';
   contactMethod?: string;
 }
 
-// Note: We are no longer exporting 'User' from here, 
-// as Supabase provides its own User type from auth.
-// Your App.tsx will need to be updated to import User from '@supabase/supabase-js'
+// In a real application, this data would come from a secure backend.
+const mockUsers: User[] = [
+  { id: 1, username: 'member1', name: 'Juan dela Cruz', cluster: 'Tuguegarao City', role: 'member', contactMethod: 'Email: juan@example.com' },
+  { id: 2, username: 'member2', name: 'Maria Santos', cluster: 'Solana', role: 'member', contactMethod: 'Phone: 0917-123-4567' },
+  { id: 3, username: 'admin', name: 'Froilan Lingan', cluster: 'HQ', role: 'admin' },
+];
+
+const mockPasswords: { [key: string]: string } = {
+  member1: 'password123',
+  member2: 'password456',
+  admin: 'adminpass',
+};
 
 /**
- * Simulates a login request to the Supabase backend.
+ * Simulates a login request to a backend.
+ * @param username The user's username.
+ * @param password The user's password.
+ * @returns A Promise that resolves with the User object on success.
+ * @throws An error if login fails.
  */
-export const login = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password,
+export const login = (username: string, password: string): Promise<User> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const user = mockUsers.find((u) => u.username === username);
+      if (user && mockPasswords[username] === password) {
+        // In a real app, you'd store a token (e.g., in localStorage or a cookie)
+        resolve(user);
+      } else {
+        reject(new Error('Invalid username or password.'));
+      }
+    }, 500); // Simulate network delay
   });
-
-  if (error) throw error;
-  if (!data.user) throw new Error("Login failed, no user returned.");
-
-  // After successful login, fetch the user's profile data
-  const { data: profileData, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', data.user.id)
-    .single(); // .single() assumes one-to-one mapping and returns an object
-
-  if (profileError) throw profileError;
-
-  // Combine auth user data and profile data
-  // This matches the structure your app expects
-  const user: UserProfile = {
-    id: data.user.id,
-    name: profileData.name,
-    cluster: profileData.cluster,
-    role: profileData.role,
-    contactMethod: profileData.contactMethod,
-  };
-
-  return user;
 };
 
 /**
  * Simulates updating a user's profile information.
+ * @param userId The ID of the user to update.
+ * @param contactMethod The new preferred contact method.
+ * @returns A Promise that resolves with the updated User object.
  */
-export const updateUserProfile = async (userId: string, contactMethod: string): Promise<UserProfile> => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .update({ contactMethod: contactMethod })
-    .eq('id', userId)
-    .select()
-    .single(); // Return the updated row
-
-  if (error) throw error;
-  return data;
+export const updateUserProfile = (userId: number, contactMethod: string): Promise<User> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const userIndex = mockUsers.findIndex(u => u.id === userId);
+      if (userIndex !== -1) {
+        // Create a new user object to ensure immutability for React state updates
+        const updatedUser = { ...mockUsers[userIndex], contactMethod };
+        mockUsers[userIndex] = updatedUser; // Update our mock "database"
+        resolve(updatedUser);
+      } else {
+        reject(new Error('User not found.'));
+      }
+    }, 300); // Simulate network delay
+  });
 };
 
 /**
  * Simulates fetching all users for an admin panel.
+ * @returns A Promise that resolves with an array of all users.
  */
-export const getAllUsers = async (): Promise<UserProfile[]> => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .neq('role', 'admin'); // .neq() means "not equal to"
-
-  if (error) throw error;
-  return data;
+export const getAllUsers = (): Promise<User[]> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            // Return all users except the admin itself for management purposes
+            resolve(mockUsers.filter(u => u.role !== 'admin'));
+        }, 400); // Simulate network delay
+    });
 };
+
 
 /**
- * Logs the user out of Supabase.
+ * Simulates logging a user out.
  */
-export const logout = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error('Error logging out:', error);
-  } else {
-    console.log('User logged out.');
-  }
+export const logout = () => {
+  // In a real app, you'd clear the authentication token.
+  console.log('User logged out.');
 };
-
-// IMPORTANT: You will need to add a Sign Up function
-// to create users in your new database.
-// You can call this from your LoginModal or a new SignUpModal.
-export const signUp = async (email: string, password: string, name: string, cluster: string) => {
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-    });
-
-    if (authError) throw authError;
-    if (!authData.user) throw new Error("Sign up failed, no user created.");
-
-    // Now, create their profile in the 'profiles' table
-    const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-            id: authData.user.id, // Link to the auth.users table
-            name: name,
-            cluster: cluster,
-            role: 'member', // Default role
-        });
-
-    if (profileError) throw profileError;
-
-    return authData.user;
-}
